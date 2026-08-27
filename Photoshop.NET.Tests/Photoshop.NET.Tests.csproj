@@ -12,8 +12,6 @@
     <!-- Override these when using a different CMake build directory. -->
     <PhotoshopApiNativeBuildDirectory Condition="'$(PhotoshopApiNativeBuildDirectory)' == '' and Exists('$(MSBuildProjectDirectory)\..\vs2022\PhotoshopAPI.C\$(Configuration)\PhotoshopAPI.C.dll')">$(MSBuildProjectDirectory)\..\vs2022\PhotoshopAPI.C\$(Configuration)\</PhotoshopApiNativeBuildDirectory>
     <PhotoshopApiNativeBuildDirectory Condition="'$(PhotoshopApiNativeBuildDirectory)' == ''">$(MSBuildProjectDirectory)\..\vs2022\PhotoshopAPI.NET\runtimes\win-x64\native\</PhotoshopApiNativeBuildDirectory>
-    <PhotoshopApiNativeDependencyDirectory Condition="'$(PhotoshopApiNativeDependencyDirectory)' == '' and '$(Configuration)' == 'Debug'">$(MSBuildProjectDirectory)\..\vs2022\vcpkg_installed\x64-windows\debug\bin\</PhotoshopApiNativeDependencyDirectory>
-    <PhotoshopApiNativeDependencyDirectory Condition="'$(PhotoshopApiNativeDependencyDirectory)' == ''">$(MSBuildProjectDirectory)\..\vs2022\vcpkg_installed\x64-windows\bin\</PhotoshopApiNativeDependencyDirectory>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,10 +20,12 @@
 
   <Target Name="CopyPhotoshopApiNativeRuntimeFiles" AfterTargets="Build">
     <ItemGroup>
-      <!-- dumpbin /dependents reports deflate.dll as PhotoshopAPI.C.dll's only
-           non-system dependency for the current MSVC Release build. -->
+      <!-- The x64-windows-static build has no project-owned native dependency
+           besides the C ABI DLL. Dynamic-build dependencies can be supplied
+           with PhotoshopApiNativeDependencyDirectory. -->
       <_PhotoshopApiNativeRuntimeFiles Include="$(PhotoshopApiNativeBuildDirectory)PhotoshopAPI.C.dll" />
-      <_PhotoshopApiNativeRuntimeFiles Include="$(PhotoshopApiNativeDependencyDirectory)deflate.dll" />
+      <_PhotoshopApiNativeRuntimeFiles Include="$(PhotoshopApiNativeDependencyDirectory)deflate.dll"
+                                      Condition="'$(PhotoshopApiNativeDependencyDirectory)' != '' and Exists('$(PhotoshopApiNativeDependencyDirectory)deflate.dll')" />
       <_MissingPhotoshopApiNativeRuntimeFiles Include="@(_PhotoshopApiNativeRuntimeFiles)" Condition="!Exists('%(Identity)')" />
     </ItemGroup>
 

@@ -12,8 +12,7 @@ static int RunSmokeTest()
         var runtimeDirectory = Path.Combine(AppContext.BaseDirectory, "runtimes", "win-x64", "native");
         var requiredFiles = new[]
         {
-            "PhotoshopAPI.C.dll",
-            "deflate.dll"
+            "PhotoshopAPI.C.dll"
         };
 
         foreach (var fileName in requiredFiles)

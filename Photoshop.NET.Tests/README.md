@@ -6,33 +6,35 @@ document with an image, group, and mask, and writes a temporary PSD.
 It also loads the copy from `runtimes/win-x64/native` by absolute path, so a
 missing native dependency fails before the wrapper test starts.
 
-For the current x64 MSVC Release build, `dumpbin /dependents` reports:
+## Native DLL requirements
+
+The static Visual Studio build was configured with:
+
+```text
+cmake -S . -B vs2022 -G "Visual Studio 17 2022" -A x64 --preset x64-static-release
+```
+
+For `vs2022/PhotoshopAPI.C/Release/PhotoshopAPI.C.dll`,
+`dumpbin /dependents` reports only:
+
+- `KERNEL32.dll`
+- `ADVAPI32.dll`
+
+Both are Windows system DLLs. Therefore the minimum application-owned native
+deployment for .NET `DllImport("PhotoshopAPI.C")` is:
 
 - `PhotoshopAPI.C.dll`
-  - `deflate.dll`
-  - `MSVCP140.dll`
-  - `MSVCP140_ATOMIC_WAIT.dll`
-  - `VCRUNTIME140.dll`
-  - `VCRUNTIME140_1.dll`
-  - Windows system DLLs and CRT API-set DLLs
-- `deflate.dll`
-  - `VCRUNTIME140.dll`
-  - Windows system DLLs and CRT API-set DLLs
 
-Therefore the project copies these project-owned native files into
-`runtimes/win-x64/native`:
+The static build does not require `deflate.dll`, `MSVCP140.dll`,
+`VCRUNTIME140.dll`, or any other MSVC runtime DLL. The .NET wrapper itself is
+managed code and does not add another native dependency. Windows supplies the
+system DLLs and resolves `DllImport("PhotoshopAPI.C")` to
+`PhotoshopAPI.C.dll`.
 
-- `PhotoshopAPI.C.dll`
-- `deflate.dll`
-
-For a directly executed test application, the same two files are also copied
-to the application directory because an ordinary project output does not
-automatically add a manually created `runtimes` directory to its native DLL
-search path. A NuGet package uses the `runtimes/win-x64/native` layout.
-
-The MSVC runtime must be installed through the Visual C++ Redistributable, or
-the four MSVC runtime DLLs listed above must also be bundled by the consuming
-application. The Windows system and CRT API-set DLLs are supplied by Windows.
+For comparison, a build using the dynamic `x64-windows` vcpkg triplet requires
+the project-owned `deflate.dll` and the MSVC runtime DLLs in addition to
+`PhotoshopAPI.C.dll`. A NuGet package should place the required native files
+under `runtimes/win-x64/native`.
 
 Build and run the test with:
 
@@ -41,5 +43,6 @@ dotnet run --project Photoshop.NET.Tests/Photoshop.NET.Tests.csproj -c Release
 ```
 
 If the native build is in a different directory, pass
-`PhotoshopApiNativeBuildDirectory` and/or
-`PhotoshopApiNativeDependencyDirectory` to MSBuild.
+`PhotoshopApiNativeBuildDirectory` to MSBuild. For a dynamic `x64-windows`
+build, also pass `PhotoshopApiNativeDependencyDirectory` so the test can copy
+`deflate.dll`.
