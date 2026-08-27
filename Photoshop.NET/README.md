@@ -4,6 +4,9 @@
 `PhotoshopAPI.C` ABI. Native objects use deterministic `IDisposable` ownership;
 dispose every document and layer handle returned by the wrapper.
 
+See [API.md](API.md) for the complete managed surface, ownership rules, and
+the audited parity gaps versus the upstream C++ documentation.
+
 ```csharp
 using var document = PhotoshopDocument.Read("input.psd");
 
