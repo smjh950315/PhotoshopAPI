@@ -24,5 +24,11 @@ public enum PhotoshopStatus
     /// <summary>The requested operation is not supported.</summary>
     NotSupported = 8,
     /// <summary>A supplied buffer was too small.</summary>
-    BufferTooSmall = 9
+    BufferTooSmall = 9,
+    /// <summary>The native object has a different layer kind or bit depth.</summary>
+    TypeMismatch = 10,
+    /// <summary>Reading the Photoshop document failed.</summary>
+    ReadFailed = 11,
+    /// <summary>An unexpected native failure occurred.</summary>
+    InternalError = 12
 }

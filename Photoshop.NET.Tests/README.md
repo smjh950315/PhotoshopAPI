@@ -2,7 +2,8 @@
 
 This project is a dependency-free managed smoke test for `Photoshop.NET`. It
 calls the public wrapper through the real `DllImport` declarations, creates a
-document with an image, group, and mask, and writes a temporary PSD.
+document with an image, group, and mask, writes a temporary PSD, reads it back,
+and verifies typed hierarchy traversal plus channel and mask access.
 It also loads the copy from `runtimes/win-x64/native` by absolute path, so a
 missing native dependency fails before the wrapper test starts.
 
@@ -17,6 +18,7 @@ cmake -S . -B vs2022 -G "Visual Studio 17 2022" -A x64 --preset x64-static-relea
 For `vs2022/PhotoshopAPI.C/Release/PhotoshopAPI.C.dll`,
 `dumpbin /dependents` reports only:
 
+- `bcrypt.dll`
 - `KERNEL32.dll`
 - `ADVAPI32.dll`
 
@@ -41,6 +43,10 @@ Build and run the test with:
 ```powershell
 dotnet run --project Photoshop.NET.Tests/Photoshop.NET.Tests.csproj -c Release
 ```
+
+Additional PSD/PSB paths may be supplied after `--`. Each is opened through
+the wrapper and probed for metadata and root-layer traversal. The validation
+run covers checked-in 16-bit and 32-bit RGB PSD samples this way.
 
 If the native build is in a different directory, pass
 `PhotoshopApiNativeBuildDirectory` to MSBuild. For a dynamic `x64-windows`

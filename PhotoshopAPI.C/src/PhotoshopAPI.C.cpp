@@ -1,6 +1,5 @@
 #include <PhotoshopAPI.C/PhotoshopAPI.C.h>
-
-#include <PhotoshopAPI.h>
+#include "PhotoshopAPI.C.Internal.h"
 
 #include <cstring>
 #include <filesystem>
@@ -11,32 +10,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-namespace psapi = NAMESPACE_PSAPI;
-
-using psapi_document_type = psapi::LayeredFile<uint8_t>;
-using psapi_layer_type = psapi::Layer<uint8_t>;
-using psapi_group_type = psapi::GroupLayer<uint8_t>;
-
-struct photoshopapi_c_document_state
-{
-    std::unique_ptr<psapi_document_type> value;
-    bool write_attempted = false;
-};
-
-struct photoshopapi_c_document
-{
-    std::shared_ptr<photoshopapi_c_document_state> state;
-    std::string last_error;
-};
-
-struct photoshopapi_c_layer
-{
-    std::shared_ptr<psapi_layer_type> value;
-    std::string last_error;
-    std::weak_ptr<photoshopapi_c_document_state> document;
-    bool attached = false;
-};
 
 namespace
 {
@@ -505,28 +478,7 @@ PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_docu
     photoshopapi_c_document* document,
     const char* utf8_path)
 {
-    if (document == nullptr || utf8_path == nullptr || utf8_path[0] == '\0')
-    {
-        return PHOTOSHOPAPI_C_STATUS_INVALID_ARGUMENT;
-    }
-    if (document->state == nullptr)
-    {
-        return PHOTOSHOPAPI_C_STATUS_OWNERSHIP_ERROR;
-    }
-    document->state->write_attempted = true;
-    return invoke(
-        document->last_error,
-        [&]
-        {
-            if (document->state->value == nullptr)
-            {
-                throw ownership_error("document is no longer usable");
-            }
-            auto value = std::move(document->state->value);
-            psapi_document_type::write(
-                std::move(*value),
-                std::filesystem::u8path(utf8_path));
-        });
+    return photoshopapi_c_document_write_ex(document, utf8_path, 1u);
 }
 
 PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_document_get_last_error(

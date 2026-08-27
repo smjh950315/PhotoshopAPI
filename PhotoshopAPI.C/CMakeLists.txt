@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.20)
 project(PhotoshopAPI.C LANGUAGES C CXX)
 
 add_library(PhotoshopAPI.C SHARED
-    src/PhotoshopAPI.C.cpp)
+    src/PhotoshopAPI.C.cpp
+    src/PhotoshopAPI.C.V2.cpp)
 
 target_compile_features(PhotoshopAPI.C PRIVATE cxx_std_20)
 target_compile_definitions(PhotoshopAPI.C PRIVATE PHOTOSHOPAPI_C_EXPORTS)

@@ -8,7 +8,7 @@ public static class PhotoshopApi
     /// <summary>
     /// Gets the ABI version expected by this managed wrapper.
     /// </summary>
-    public const uint AbiVersion = 1;
+    public const uint AbiVersion = 2;
 
     /// <summary>
     /// Gets the ABI version reported by the loaded native library.
@@ -80,6 +80,9 @@ public static class PhotoshopApi
         PhotoshopStatus.WriteFailed => "The native API failed to write the document.",
         PhotoshopStatus.NotSupported => "The requested operation is not supported.",
         PhotoshopStatus.BufferTooSmall => "The supplied buffer is too small.",
+        PhotoshopStatus.TypeMismatch => "The layer type or bit depth does not support this operation.",
+        PhotoshopStatus.ReadFailed => "The native API failed to read the Photoshop document.",
+        PhotoshopStatus.InternalError => "The native API encountered an unexpected error.",
         _ => $"PhotoshopAPI.C returned status {(int)status}."
     };
 }
