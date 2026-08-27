@@ -19,7 +19,7 @@
 BUILD_LITE:BOOL=OFF
 
 //Build plugins programs from the blosc compression library
-BUILD_PLUGINS:BOOL=OFF
+BUILD_PLUGINS:BOOL=ON
 
 //Build a shared library version of the blosc library.
 BUILD_SHARED:BOOL=OFF
@@ -524,7 +524,7 @@ PSAPI_BUILD_TESTS:BOOL=OFF
 
 //Build the extra dependencies using vckpg instead of system installed
 // libraries
-PSAPI_USE_VCPKG:BOOL=ON
+PSAPI_USE_VCPKG:BOOL=OFF
 
 //Force new FindPython
 PYBIND11_FINDPYTHON:BOOL=OFF
@@ -1166,4 +1166,3 @@ pybind11_FOUND:INTERNAL=TRUE
 pybind11_INCLUDE_DIR:INTERNAL=D:/Projects/CharacterForge/native/src/PhotoshopAPI/thirdparty/pybind11/include
 //Directories where pybind11 and possibly Python headers are located
 pybind11_INCLUDE_DIRS:INTERNAL=D:/Projects/CharacterForge/native/src/PhotoshopAPI/thirdparty/pybind11/include;C:/Users/Administrator/AppData/Roaming/uv/python/cpython-3.11.15-windows-x86_64-none/Include
-

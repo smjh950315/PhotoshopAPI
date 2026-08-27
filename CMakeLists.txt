@@ -17,6 +17,7 @@ option(PSAPI_BUILD_EXAMPLES "Build the examples associated with the PhotoshopAPI
 option(PSAPI_BUILD_BENCHMARKS "Build the benchmarks associated with the PhotoshopAPI" ON)
 option(PSAPI_BUILD_DOCS "Builds the documentation, requires some external installs which are documented in the README.md" OFF)
 option(PSAPI_BUILD_PYTHON "Build the python bindings associated with the PhotoshopAPI" ON)
+option(PSAPI_BUILD_C_ABI "Build the C ABI adapter for PhotoshopAPI" ON)
 
 
 if (PSAPI_BUILD_PYTHON)
@@ -84,12 +85,20 @@ target_include_directories(tcb_span SYSTEM INTERFACE thirdparty/compatibility)
 
 # CompressedImage for loading images into a compressed memory buffer as well as storing our channels
 set(COMPRESSED_IMAGE_USE_VCPKG OFF)
+if(PSAPI_BUILD_C_ABI)
+    # compressed-image's Blosc wrapper calls register_filters(), so the plugin
+    # sources must be part of the static dependency when the C ABI is linked.
+    set(BUILD_PLUGINS ON CACHE BOOL "Build c-blosc2 plugins required by PhotoshopAPI.C" FORCE)
+endif()
 add_subdirectory(thirdparty/compressed-image)
 
 # Projects
 # --------------------------------------------------------------------------
 if(PSAPI_BUILD_STATIC)
     add_subdirectory (PhotoshopAPI)
+    if(PSAPI_BUILD_C_ABI)
+        add_subdirectory (PhotoshopAPI.C)
+    endif()
 endif()
 if(PSAPI_BUILD_TESTS)
     add_subdirectory (PhotoshopTest)

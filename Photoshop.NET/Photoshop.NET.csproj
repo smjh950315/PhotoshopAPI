@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="runtimes\win-x64\native\" />
+  </ItemGroup>
+
+  <Target Name="CopyPhotoshopApiNativeLibrary" AfterTargets="Build" Condition="Exists('$(MSBuildThisFileDirectory)..\vs2022\PhotoshopAPI.C\$(Configuration)\PhotoshopAPI.C.dll')">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)..\vs2022\PhotoshopAPI.C\$(Configuration)\PhotoshopAPI.C.dll" DestinationFolder="$(OutputPath)" />
+  </Target>
+
+</Project>

@@ -178,6 +178,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{8BB94709-5E4A-33AF-B09B-44B7E407EAFB}</Project>
       <Name>PhotoshopAPI</Name>
     </ProjectReference>
+    <ProjectReference Include=".\PhotoshopAPI.C\PhotoshopAPI.C.vcxproj">
+      <Project>{F53A54F5-BBCE-3A0D-A6F4-D3DDA1A98ED3}</Project>
+      <Name>PhotoshopAPI.C</Name>
+    </ProjectReference>
+    <ProjectReference Include=".\PhotoshopAPI.C\PhotoshopAPI.C.AbiSmoke.vcxproj">
+      <Project>{033B8866-966F-3B91-AD61-2118D211B155}</Project>
+      <Name>PhotoshopAPI.C.AbiSmoke</Name>
+    </ProjectReference>
     <ProjectReference Include=".\thirdparty\compressed-image\thirdparty\c-blosc2\blosc\blosc2_static.vcxproj">
       <Project>{2034678F-63E5-344A-BA79-E09AFDC8C44F}</Project>
       <Name>blosc2_static</Name>

@@ -70,6 +70,21 @@
     <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\blosc\shuffle.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\plugins\filters\ndcell\ndcell.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\plugins\filters\ndmean\ndmean.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\plugins\filters\bytedelta\bytedelta.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\plugins\filters\int_trunc\int_trunc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\plugins\filters\filters-registry.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\blosc\fastcopy.h">

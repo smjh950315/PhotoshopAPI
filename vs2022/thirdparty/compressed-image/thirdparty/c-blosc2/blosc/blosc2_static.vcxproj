@@ -344,6 +344,11 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(PreprocessorDefinitions);SHUFFLE_SSE2_ENABLED;SHUFFLE_AVX2_ENABLED</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(PreprocessorDefinitions);SHUFFLE_SSE2_ENABLED;SHUFFLE_AVX2_ENABLED</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\plugins\filters\ndcell\ndcell.c" />
+    <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\plugins\filters\ndmean\ndmean.c" />
+    <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\plugins\filters\bytedelta\bytedelta.c" />
+    <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\plugins\filters\int_trunc\int_trunc.c" />
+    <ClCompile Include="..\..\..\..\..\..\thirdparty\compressed-image\thirdparty\c-blosc2\plugins\filters\filters-registry.c" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
