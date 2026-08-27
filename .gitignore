@@ -406,3 +406,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+vs2022/.vs/
+vs2022/vcpkg_installed/
