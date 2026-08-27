@@ -8,12 +8,9 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="runtimes\win-x64\native\" />
-  </ItemGroup>
-
-  <Target Name="CopyPhotoshopApiNativeLibrary" AfterTargets="Build" Condition="Exists('$(MSBuildThisFileDirectory)..\vs2022\PhotoshopAPI.C\$(Configuration)\PhotoshopAPI.C.dll')">
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)..\vs2022\PhotoshopAPI.C\$(Configuration)\PhotoshopAPI.C.dll" DestinationFolder="$(OutputPath)" />
+  <Target Name="CopyPhotoshopApiNativeLibrary" 
+          AfterTargets="Build" Condition="Exists('$(MSBuildThisFileDirectory)..\bin-int\PhotoshopAPI\$(Configuration)\PhotoshopAPI.C\PhotoshopAPI.C.dll')">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)..\bin-int\PhotoshopAPI\$(Configuration)\PhotoshopAPI.C\PhotoshopAPI.C.dll" DestinationFolder="$(OutputPath)runtimes\win-x64\native" />
   </Target>
 
 </Project>
