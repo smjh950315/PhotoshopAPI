@@ -1,7 +1,0 @@
-prefix=C:/Program Files (x86)/PhotoshopAPIBuild
-includedir=${prefix}/include
-
-Name: nlohmann_json
-Description: JSON for Modern C++
-Version: 3.11.3
-Cflags: -I${includedir}
