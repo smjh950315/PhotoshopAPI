@@ -19,7 +19,7 @@
 BUILD_LITE:BOOL=OFF
 
 //Build plugins programs from the blosc compression library
-BUILD_PLUGINS:BOOL=ON
+BUILD_PLUGINS:BOOL=OFF
 
 //Build a shared library version of the blosc library.
 BUILD_SHARED:BOOL=OFF

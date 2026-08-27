@@ -78,6 +78,11 @@ set (SIMDUTF_TESTS OFF)
 set (SIMDUTF_TOOLS OFF)
 set (SIMDUTF_ICONV OFF)
 add_subdirectory (thirdparty/simdutf)
+if(MSVC AND TARGET simdutf)
+    # simdutf's generated MSVC sources contain UTF-8 text that trips C4819
+    # under the system code page; preserve the dependency's non-WX behavior.
+    target_compile_options(simdutf PRIVATE /wd4819 /WX-)
+endif()
 
 # Add span from tcb for compatibility with older compilers for python bindings
 add_library(tcb_span INTERFACE)
@@ -86,11 +91,20 @@ target_include_directories(tcb_span SYSTEM INTERFACE thirdparty/compatibility)
 # CompressedImage for loading images into a compressed memory buffer as well as storing our channels
 set(COMPRESSED_IMAGE_USE_VCPKG OFF)
 if(PSAPI_BUILD_C_ABI)
-    # compressed-image's Blosc wrapper calls register_filters(), so the plugin
-    # sources must be part of the static dependency when the C ABI is linked.
-    set(BUILD_PLUGINS ON CACHE BOOL "Build c-blosc2 plugins required by PhotoshopAPI.C" FORCE)
+    # compressed-image's Blosc wrapper calls register_filters(). Keep Blosc's
+    # optional plugin mode off so codec/tuner hooks are not enabled, and add
+    # the filter registry implementation required by the C ABI explicitly.
+    set(BUILD_PLUGINS OFF CACHE BOOL "Build c-blosc2 plugins required by PhotoshopAPI.C" FORCE)
 endif()
 add_subdirectory(thirdparty/compressed-image)
+if(PSAPI_BUILD_C_ABI AND TARGET blosc2_static)
+    target_sources(blosc2_static PRIVATE
+        thirdparty/compressed-image/thirdparty/c-blosc2/plugins/filters/ndcell/ndcell.c
+        thirdparty/compressed-image/thirdparty/c-blosc2/plugins/filters/ndmean/ndmean.c
+        thirdparty/compressed-image/thirdparty/c-blosc2/plugins/filters/bytedelta/bytedelta.c
+        thirdparty/compressed-image/thirdparty/c-blosc2/plugins/filters/int_trunc/int_trunc.c
+        thirdparty/compressed-image/thirdparty/c-blosc2/plugins/filters/filters-registry.c)
+endif()
 
 # Projects
 # --------------------------------------------------------------------------
