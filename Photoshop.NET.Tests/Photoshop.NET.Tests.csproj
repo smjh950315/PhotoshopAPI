@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- Override these when using a different CMake build directory. -->
+    <PhotoshopApiNativeBuildDirectory Condition="'$(PhotoshopApiNativeBuildDirectory)' == '' and Exists('$(MSBuildProjectDirectory)\..\vs2022\PhotoshopAPI.C\$(Configuration)\PhotoshopAPI.C.dll')">$(MSBuildProjectDirectory)\..\vs2022\PhotoshopAPI.C\$(Configuration)\</PhotoshopApiNativeBuildDirectory>
+    <PhotoshopApiNativeBuildDirectory Condition="'$(PhotoshopApiNativeBuildDirectory)' == ''">$(MSBuildProjectDirectory)\..\vs2022\PhotoshopAPI.NET\runtimes\win-x64\native\</PhotoshopApiNativeBuildDirectory>
+    <PhotoshopApiNativeDependencyDirectory Condition="'$(PhotoshopApiNativeDependencyDirectory)' == '' and '$(Configuration)' == 'Debug'">$(MSBuildProjectDirectory)\..\vs2022\vcpkg_installed\x64-windows\debug\bin\</PhotoshopApiNativeDependencyDirectory>
+    <PhotoshopApiNativeDependencyDirectory Condition="'$(PhotoshopApiNativeDependencyDirectory)' == ''">$(MSBuildProjectDirectory)\..\vs2022\vcpkg_installed\x64-windows\bin\</PhotoshopApiNativeDependencyDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Photoshop.NET\Photoshop.NET.csproj" />
+  </ItemGroup>
+
+  <Target Name="CopyPhotoshopApiNativeRuntimeFiles" AfterTargets="Build">
+    <ItemGroup>
+      <!-- dumpbin /dependents reports deflate.dll as PhotoshopAPI.C.dll's only
+           non-system dependency for the current MSVC Release build. -->
+      <_PhotoshopApiNativeRuntimeFiles Include="$(PhotoshopApiNativeBuildDirectory)PhotoshopAPI.C.dll" />
+      <_PhotoshopApiNativeRuntimeFiles Include="$(PhotoshopApiNativeDependencyDirectory)deflate.dll" />
+      <_MissingPhotoshopApiNativeRuntimeFiles Include="@(_PhotoshopApiNativeRuntimeFiles)" Condition="!Exists('%(Identity)')" />
+    </ItemGroup>
+
+    <Error Condition="'@(_MissingPhotoshopApiNativeRuntimeFiles)' != ''"
+           Text="Missing native runtime file(s): @(_MissingPhotoshopApiNativeRuntimeFiles). Set PhotoshopApiNativeBuildDirectory and/or PhotoshopApiNativeDependencyDirectory to the CMake output directories." />
+    <MakeDir Directories="$(OutputPath)runtimes\win-x64\native" />
+    <Copy SourceFiles="@(_PhotoshopApiNativeRuntimeFiles)"
+          DestinationFolder="$(OutputPath)runtimes\win-x64\native"
+          SkipUnchangedFiles="true" />
+    <!-- A directly executed project probes its application directory. Keep a
+         copy there for the smoke test; the runtimes path is the NuGet layout. -->
+    <Copy SourceFiles="@(_PhotoshopApiNativeRuntimeFiles)"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

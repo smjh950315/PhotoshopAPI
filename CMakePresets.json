@@ -30,6 +30,31 @@
           }
       },
       {
+          "name": "x64-static-debug",
+          "displayName": "x64 Debug (static runtime)",
+          "inherits": "x64-debug",
+          "cacheVariables": {
+              "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+              "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+          }
+      },
+      {
+          "name": "x64-static-relwithdebuginfo",
+          "displayName": "x64 RelWithDebInfo (static runtime)",
+          "inherits": "x64-static-debug",
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+          }
+      },
+      {
+          "name": "x64-static-release",
+          "displayName": "x64 Release (static runtime)",
+          "inherits": "x64-static-debug",
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Release"
+          }
+      },
+      {
         "name": "x64-debug-asan",
         "displayName": "x64 Debug with ASan",
         "inherits": "windows-base",
@@ -40,7 +65,7 @@
         "cacheVariables": {
           "CMAKE_BUILD_TYPE": "Debug",
           "CMAKE_C_FLAGS": "/fsanitize=address",
-          "CMAKE_CXX_FLAGS": "/fsanitize=address",
+          "CMAKE_CXX_FLAGS": "/fsanitize=address"
         }
       },
       {
