@@ -208,9 +208,20 @@ public static PhotoshopImageLayer CreateImageRgba8(
 public static PhotoshopImageLayer CreateImageRgba8(
     Rgba8Image image,
     PhotoshopLayerOptions options = default);
+public static PhotoshopImageLayer CreateImageRgb8(
+    ReadOnlySpan<byte> pixels,
+    uint width,
+    uint height,
+    uint strideBytes = 0,
+    PhotoshopLayerOptions options = default);
+public static PhotoshopImageLayer CreateImageRgb8(
+    Rgb8Image image,
+    PhotoshopLayerOptions options = default);
 ```
 
-These constructors create detached 8-bit layers. Attach them with
+RGB input contains exactly three packed bytes per pixel and creates no alpha
+channel. RGBA input uses four packed bytes per pixel with straight alpha. Both
+constructors create detached 8-bit layers. Attach them with
 `PhotoshopDocument.AddLayer()` or, after attaching a group to an 8-bit
 document, `PhotoshopGroupLayer.AddChild()`.
 
@@ -279,6 +290,7 @@ full-resolution channels, or linked raw file bytes.
 - `PhotoshopLayerInfo`
 - `PhotoshopMaskInfo`
 - `PhotoshopLayerOptions`
+- `Rgb8Image`
 - `Rgba8Image`
 - `Mask8Image`
 
@@ -320,7 +332,7 @@ overloads.
 | Common layer attributes | Supported | Supported | Name, blend mode, label color, geometry, opacity, fill, visibility, locking, and clipping are exposed. |
 | Pixel masks | Partial | Partial | Mask data, geometry, density, feather, default color, relative position, and disabled state are exposed. Mask removal/extraction, inversion controls, and mask-specific compression are missing. |
 | Image channels on existing layers | Supported | Supported | Typed per-channel get/set works for 8/16/32-bit layers. Whole-image map get/set, channel views, and bulk dimension-changing replacement are missing. |
-| New image layers | 8-bit RGBA only | 8-bit RGBA only | Generic channel-map constructors and 16/32-bit constructors are missing. A new 16/32-bit document can be declared but cannot currently be populated from scratch through these wrappers. Existing 16/32-bit layers remain readable and editable. |
+| New image layers | 8-bit RGB/RGBA only | 8-bit RGB/RGBA only | Generic channel-map constructors and 16/32-bit constructors are missing. A new 16/32-bit document can be declared but cannot currently be populated from scratch through these wrappers. Existing 16/32-bit layers remain readable and editable. |
 | New group layers | 8-bit only | 8-bit only | C++ group constructors for all bit depths are not wrapped. |
 | Group hierarchy | Mostly supported | Mostly supported | Child traversal, collapsed state, add, document remove, and move are exposed. Replacing the entire child vector and direct group remove-by-index/name overloads are missing. |
 | Text content | Supported | Supported | Read, set, replace, and document text-cache invalidation are exposed. |

@@ -49,7 +49,9 @@ internal static class NativeMethods
     [DllImport(LibraryName, CallingConvention = Convention, ExactSpelling = true, EntryPoint = "photoshopapi_c_group_layer_create")]
     internal static extern PhotoshopStatus CreateGroupLayer(ref NativeLayerOptionsData options, out nint layer);
     [DllImport(LibraryName, CallingConvention = Convention, ExactSpelling = true, EntryPoint = "photoshopapi_c_image_layer_create_rgba8")]
-    internal static extern PhotoshopStatus CreateImageLayer(ref NativeRgba8View source, ref NativeLayerOptionsData options, out nint layer);
+    internal static extern PhotoshopStatus CreateRgba8ImageLayer(ref NativeRgba8View source, ref NativeLayerOptionsData options, out nint layer);
+    [DllImport(LibraryName, CallingConvention = Convention, ExactSpelling = true, EntryPoint = "photoshopapi_c_image_layer_create_rgb8")]
+    internal static extern PhotoshopStatus CreateRgb8ImageLayer(ref NativeRgb8View source, ref NativeLayerOptionsData options, out nint layer);
     [DllImport(LibraryName, CallingConvention = Convention, ExactSpelling = true, EntryPoint = "photoshopapi_c_layer_destroy")]
     internal static extern void DestroyLayer(nint layer);
     [DllImport(LibraryName, CallingConvention = Convention, ExactSpelling = true, EntryPoint = "photoshopapi_c_layer_get_info")]

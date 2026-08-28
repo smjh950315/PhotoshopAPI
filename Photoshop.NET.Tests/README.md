@@ -2,8 +2,9 @@
 
 This project is a dependency-free managed smoke test for `Photoshop.NET`. It
 calls the public wrapper through the real `DllImport` declarations, creates a
-document with an image, group, and mask, writes a temporary PSD, reads it back,
-and verifies typed hierarchy traversal plus channel and mask access.
+document with RGB and RGBA images, a group, and a mask, writes a temporary PSD,
+reads it back, and verifies typed hierarchy traversal plus channel, alpha, and
+mask behavior.
 It also loads the copy from `runtimes/win-x64/native` by absolute path, so a
 missing native dependency fails before the wrapper test starts.
 

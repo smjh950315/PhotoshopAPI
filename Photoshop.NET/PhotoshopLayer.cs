@@ -61,6 +61,14 @@ public class PhotoshopLayer : IDisposable
     public static PhotoshopImageLayer CreateImageRgba8(Rgba8Image image, PhotoshopLayerOptions options = default) =>
         PhotoshopImageLayer.CreateRgba8(image.Pixels.Span, image.Width, image.Height, image.StrideBytes, options);
 
+    /// <summary>Creates an 8-bit image layer from packed RGB pixels without an alpha channel.</summary>
+    public static PhotoshopImageLayer CreateImageRgb8(ReadOnlySpan<byte> pixels, uint width, uint height, uint strideBytes = 0, PhotoshopLayerOptions options = default) =>
+        PhotoshopImageLayer.CreateRgb8(pixels, width, height, strideBytes, options);
+
+    /// <summary>Creates an 8-bit image layer from a described RGB image without an alpha channel.</summary>
+    public static PhotoshopImageLayer CreateImageRgb8(Rgb8Image image, PhotoshopLayerOptions options = default) =>
+        PhotoshopImageLayer.CreateRgb8(image.Pixels.Span, image.Width, image.Height, image.StrideBytes, options);
+
     /// <summary>Gets available Photoshop channel indices, including mask index -2.</summary>
     public IReadOnlyList<int> GetChannelIndices()
     {

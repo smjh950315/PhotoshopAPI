@@ -42,10 +42,23 @@ static int RunSmokeTest(string[] inputDocuments)
             width,
             height,
             options: new PhotoshopLayerOptions(Name: "Test Image"));
+        using var rgbImage = PhotoshopLayer.CreateImageRgb8(
+            new Rgb8Image(
+                new byte[]
+                {
+                    255, 255, 0,
+                    0, 255, 255,
+                    255, 0, 255,
+                    0, 0, 0
+                },
+                width,
+                height),
+            options: new PhotoshopLayerOptions(Name: "Test RGB Image"));
 
         image.SetMask8(new byte[] { 255, 192, 128, 0 }, width, height);
         document.AddLayer(group);
         group.AddChild(image);
+        group.AddChild(rgbImage);
 
         var outputPath = Path.Combine(Path.GetTempPath(), $"Photoshop.NET.Tests-{Guid.NewGuid():N}.psd");
         try
@@ -65,7 +78,7 @@ static int RunSmokeTest(string[] inputDocuments)
             }
 
             using var loadedRoot = loaded.GetRootLayer(0);
-            if (loadedRoot is not PhotoshopGroupLayer loadedGroup || loadedGroup.Name != "Test Group" || loadedGroup.ChildCount != 1)
+            if (loadedRoot is not PhotoshopGroupLayer loadedGroup || loadedGroup.Name != "Test Group" || loadedGroup.ChildCount != 2)
             {
                 throw new InvalidOperationException("The root group hierarchy was not preserved.");
             }
@@ -84,6 +97,18 @@ static int RunSmokeTest(string[] inputDocuments)
             if (loadedChild.GetChannel8(0).Length != width * height || loadedChild.GetMaskBytes().Length != width * height)
             {
                 throw new InvalidOperationException("Channel or mask data had an unexpected size after read-back.");
+            }
+
+            using var loadedRgb = loaded.FindLayer("Test Group/Test RGB Image");
+            if (loadedRgb is not PhotoshopImageLayer)
+            {
+                throw new InvalidOperationException("The RGB image was not exposed as a typed image layer.");
+            }
+            var rgbChannelIndices = loadedRgb.GetChannelIndices();
+            if (!rgbChannelIndices.Contains(0) || !rgbChannelIndices.Contains(1) ||
+                !rgbChannelIndices.Contains(2) || rgbChannelIndices.Contains(-1))
+            {
+                throw new InvalidOperationException("The RGB image did not preserve exactly the three color channels.");
             }
         }
         finally
@@ -107,7 +132,7 @@ static int RunSmokeTest(string[] inputDocuments)
             Console.WriteLine($"Read {info.BitDepth} {info.ColorMode} document: {inputDocument}");
         }
 
-        Console.WriteLine("Photoshop.NET create, write, read, hierarchy, channel, and mask smoke test passed.");
+        Console.WriteLine("Photoshop.NET RGB/RGBA create, write, read, hierarchy, channel, and mask smoke test passed.");
         return 0;
     }
     catch (Exception exception)

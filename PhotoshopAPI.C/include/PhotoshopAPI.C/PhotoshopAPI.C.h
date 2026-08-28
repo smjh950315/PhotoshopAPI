@@ -193,6 +193,15 @@ typedef struct photoshopapi_c_rgba8_view
     uint32_t stride_bytes;
 } photoshopapi_c_rgba8_view;
 
+/* Packed RGB8 scanlines with no alpha channel. The memory is borrowed for the call. */
+typedef struct photoshopapi_c_rgb8_view
+{
+    const uint8_t* pixels;
+    uint32_t width;
+    uint32_t height;
+    uint32_t stride_bytes;
+} photoshopapi_c_rgb8_view;
+
 /* One 8-bit grayscale pixel mask. The memory is borrowed for the call. */
 typedef struct photoshopapi_c_mask8_view
 {
@@ -275,6 +284,10 @@ PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_grou
     photoshopapi_c_layer** out_layer);
 PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_image_layer_create_rgba8(
     const photoshopapi_c_rgba8_view* source,
+    const photoshopapi_c_layer_options* options,
+    photoshopapi_c_layer** out_layer);
+PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_image_layer_create_rgb8(
+    const photoshopapi_c_rgb8_view* source,
     const photoshopapi_c_layer_options* options,
     photoshopapi_c_layer** out_layer);
 PHOTOSHOPAPI_C_API void PHOTOSHOPAPI_C_CALL photoshopapi_c_layer_destroy(

@@ -169,6 +169,31 @@ std::unordered_map<psapi::Enum::ChannelID, std::vector<uint8_t>> copy_rgba_view(
     return channels;
 }
 
+std::unordered_map<psapi::Enum::ChannelID, std::vector<uint8_t>> copy_rgb_view(
+    const photoshopapi_c_rgb8_view& view)
+{
+    const auto stride = validate_view(view, 3u, "source");
+    const auto pixel_count = checked_pixel_count(view.width, view.height);
+    std::unordered_map<psapi::Enum::ChannelID, std::vector<uint8_t>> channels;
+    channels[psapi::Enum::ChannelID::Red].resize(pixel_count);
+    channels[psapi::Enum::ChannelID::Green].resize(pixel_count);
+    channels[psapi::Enum::ChannelID::Blue].resize(pixel_count);
+
+    for (uint32_t y = 0; y < view.height; ++y)
+    {
+        const auto* row = view.pixels + static_cast<size_t>(y) * stride;
+        for (uint32_t x = 0; x < view.width; ++x)
+        {
+            const auto source_index = static_cast<size_t>(x) * 3u;
+            const auto target_index = static_cast<size_t>(y) * view.width + x;
+            channels[psapi::Enum::ChannelID::Red][target_index] = row[source_index];
+            channels[psapi::Enum::ChannelID::Green][target_index] = row[source_index + 1u];
+            channels[psapi::Enum::ChannelID::Blue][target_index] = row[source_index + 2u];
+        }
+    }
+    return channels;
+}
+
 template <typename Callable>
 photoshopapi_c_status invoke(std::string& error, Callable&& callable) noexcept
 {
@@ -357,6 +382,45 @@ PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_imag
             params.width = source->width;
             params.height = source->height;
             auto channels = copy_rgba_view(*source);
+            auto image = std::make_shared<psapi::ImageLayer<uint8_t>>(
+                std::move(channels),
+                params);
+            set_layer_position(*image, options);
+            auto layer = std::make_unique<photoshopapi_c_layer>();
+            layer->value = std::move(image);
+            result = layer.release();
+        });
+    if (status == PHOTOSHOPAPI_C_STATUS_SUCCESS)
+    {
+        *out_layer = result;
+    }
+    else
+    {
+        delete result;
+    }
+    return status;
+}
+
+PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_image_layer_create_rgb8(
+    const photoshopapi_c_rgb8_view* source,
+    const photoshopapi_c_layer_options* options,
+    photoshopapi_c_layer** out_layer)
+{
+    if (source == nullptr || out_layer == nullptr)
+    {
+        return PHOTOSHOPAPI_C_STATUS_INVALID_ARGUMENT;
+    }
+    *out_layer = nullptr;
+    photoshopapi_c_layer* result = nullptr;
+    std::string error;
+    const auto status = invoke(
+        error,
+        [&]
+        {
+            auto params = make_params(options, "Image");
+            params.width = source->width;
+            params.height = source->height;
+            auto channels = copy_rgb_view(*source);
             auto image = std::make_shared<psapi::ImageLayer<uint8_t>>(
                 std::move(channels),
                 params);
