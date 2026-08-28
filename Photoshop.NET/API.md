@@ -61,7 +61,7 @@ document.Write("output.psd");
 ```csharp
 public static class PhotoshopApi
 {
-    public const uint AbiVersion = 2;
+    public const uint AbiVersion = 3;
     public static uint NativeAbiVersion { get; }
     public static void EnsureCompatible();
 }
@@ -104,6 +104,7 @@ is supported.
 public void SetSize(ulong width, ulong height);
 public void SetDpi(float dpi);
 public void SetCompression(PhotoshopCompression compression);
+public void SetMergedImage(Rgb8Image image);
 public void InvalidateTextCache();
 
 public byte[] GetIccProfile();
@@ -111,6 +112,8 @@ public void SetIccProfile(ReadOnlySpan<byte> profile);
 ```
 
 `SetCompression()` selects one write compression for all current channels.
+`SetMergedImage()` supplies the flattened RGB8 composite stored in the PSD
+image-data section. The image dimensions must match an 8-bit RGB document.
 After editing text from a file read from disk, call `InvalidateTextCache()`
 before writing so Photoshop refreshes the rendered text.
 

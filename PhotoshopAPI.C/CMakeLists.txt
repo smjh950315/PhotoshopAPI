@@ -24,3 +24,16 @@ add_executable(PhotoshopAPI.C.AbiSmoke
 target_link_libraries(PhotoshopAPI.C.AbiSmoke PRIVATE PhotoshopAPI.C)
 target_include_directories(PhotoshopAPI.C.AbiSmoke PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/include")
+
+add_executable(PhotoshopAPI.C.FixtureGenerator
+    tests/PhotoshopAPI.C.FixtureGenerator.cpp)
+target_compile_features(PhotoshopAPI.C.FixtureGenerator PRIVATE cxx_std_20)
+target_link_libraries(PhotoshopAPI.C.FixtureGenerator PRIVATE PhotoshopAPI.C)
+target_include_directories(PhotoshopAPI.C.FixtureGenerator PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/include")
+
+if(MSVC)
+    target_compile_options(PhotoshopAPI.C.FixtureGenerator PRIVATE /W4 /WX /utf-8)
+else()
+    target_compile_options(PhotoshopAPI.C.FixtureGenerator PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()

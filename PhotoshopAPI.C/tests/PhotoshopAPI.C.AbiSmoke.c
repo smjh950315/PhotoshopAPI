@@ -7,11 +7,13 @@ int main(void)
     photoshopapi_c_layer* image = 0;
     photoshopapi_c_layer* rgb_image = 0;
     photoshopapi_c_rgba8_view view = {0, 0, 0, 0};
-    photoshopapi_c_rgb8_view rgb_view = {0, 0, 0, 0};
+    uint8_t merged_pixel[3] = {32, 64, 128};
+    photoshopapi_c_rgb8_view rgb_view = {merged_pixel, 1, 1, 3};
     photoshopapi_c_layer_options options = {0, 0, 0, 1.0f, 1, 0, {0, 0}};
 
     (void)photoshopapi_c_get_abi_version();
     (void)photoshopapi_c_document_create(1, 1, &document);
+    (void)photoshopapi_c_document_set_merged_rgb8(document, &rgb_view);
     (void)photoshopapi_c_group_layer_create(&options, &group);
     (void)photoshopapi_c_image_layer_create_rgba8(&view, &options, &image);
     (void)photoshopapi_c_image_layer_create_rgb8(&rgb_view, &options, &rgb_image);

@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
 
-#define PHOTOSHOPAPI_C_ABI_VERSION 2u
+#define PHOTOSHOPAPI_C_ABI_VERSION 3u
 
 typedef enum photoshopapi_c_status
 {
@@ -255,6 +255,10 @@ PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_docu
 PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_document_set_compression(
     photoshopapi_c_document* document,
     photoshopapi_c_compression compression);
+/* Sets the merged RGB8 composite for an 8-bit RGB document. The memory is borrowed for the call. */
+PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_document_set_merged_rgb8(
+    photoshopapi_c_document* document,
+    const photoshopapi_c_rgb8_view* source);
 PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_document_invalidate_text_cache(
     photoshopapi_c_document* document);
 

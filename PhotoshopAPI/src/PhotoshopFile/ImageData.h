@@ -9,6 +9,10 @@
 
 #include "blosc2.h"
 
+#include <stdexcept>
+#include <utility>
+#include <variant>
+#include <vector>
 
 PSAPI_NAMESPACE_BEGIN
 
@@ -16,41 +20,60 @@ PSAPI_NAMESPACE_BEGIN
 namespace ImageDataImpl
 {
 	template <typename T>
-	void writeCompressedData(File& document, const FileHeader& header, const uint16_t numChannels, std::vector<T>&& uncompressedData)
+	using channel_data = std::vector<std::vector<T>>;
+
+	template <typename T>
+	void writeCompressedData(File& document, const FileHeader& header, const channel_data<T>& channels)
 	{
 		if (header.m_Version == Enum::Version::Psd)
 		{
-			std::vector<uint16_t> scanlineSizes;
-			std::vector<uint8_t> compressedData = CompressRLEImageDataPsd(uncompressedData, header.m_Width, header.m_Height, scanlineSizes);
-			// First write all the scanline sizes, then the compressed data
-			for (int i = 0; i < numChannels; ++i)
+			std::vector<std::vector<uint16_t>> scanlineSizes;
+			std::vector<std::vector<uint8_t>> compressedData;
+			scanlineSizes.reserve(channels.size());
+			compressedData.reserve(channels.size());
+			for (const auto& channel : channels)
 			{
-				// we must copy here as we otherwise byteswap multiple times
-				auto data = scanlineSizes;
+				auto channelCopy = channel;
+				std::vector<uint16_t> channelScanlineSizes;
+				compressedData.push_back(CompressRLEImageDataPsd(channelCopy, header.m_Width, header.m_Height, channelScanlineSizes));
+				scanlineSizes.push_back(std::move(channelScanlineSizes));
+			}
+
+			// First write all the scanline sizes, then the compressed data
+			for (const auto& channelScanlineSizes : scanlineSizes)
+			{
+				auto data = channelScanlineSizes;
 				WriteBinaryArray<uint16_t>(document, std::move(data));
 			}
-			for (int i = 0; i < numChannels; ++i)
+			for (const auto& channelData : compressedData)
 			{
-				// we must copy here as we otherwise byteswap multiple times
-				auto data = compressedData;
+				auto data = channelData;
 				WriteBinaryArray<uint8_t>(document, std::move(data));
 			}
 		}
 		else
 		{
-			std::vector<uint32_t> scanlineSizes;
-			std::vector<uint8_t> compressedData = CompressRLEImageDataPsb(uncompressedData, header.m_Width, header.m_Height, scanlineSizes);
-			// First write all the scanline sizes, then the compressed data
-			for (int i = 0; i < numChannels; ++i)
+			std::vector<std::vector<uint32_t>> scanlineSizes;
+			std::vector<std::vector<uint8_t>> compressedData;
+			scanlineSizes.reserve(channels.size());
+			compressedData.reserve(channels.size());
+			for (const auto& channel : channels)
 			{
-				// we must copy here as we otherwise byteswap multiple times
-				auto data = scanlineSizes;
+				auto channelCopy = channel;
+				std::vector<uint32_t> channelScanlineSizes;
+				compressedData.push_back(CompressRLEImageDataPsb(channelCopy, header.m_Width, header.m_Height, channelScanlineSizes));
+				scanlineSizes.push_back(std::move(channelScanlineSizes));
+			}
+
+			// First write all the scanline sizes, then the compressed data
+			for (const auto& channelScanlineSizes : scanlineSizes)
+			{
+				auto data = channelScanlineSizes;
 				WriteBinaryArray<uint32_t>(document, std::move(data));
 			}
-			for (int i = 0; i < numChannels; ++i)
+			for (const auto& channelData : compressedData)
 			{
-				// we must copy here as we otherwise byteswap multiple times
-				auto data = compressedData;
+				auto data = channelData;
 				WriteBinaryArray<uint8_t>(document, std::move(data));
 			}
 		}
@@ -66,33 +89,33 @@ namespace ImageDataImpl
 
 /// \brief This section is for interoperability with different software such as lightroom and holds a composite of all the layers
 ///
-/// When writing out data we fill it with empty pixels using Rle compression, this is due to Photoshop unfortunately requiring
-/// it to be present. Due to this compression step we can usually save lots of data over what Photoshop writes out
+/// When no merged image is supplied, this section is filled with empty pixels using Rle compression. Photoshop unfortunately
+/// requires the section to be present.
 struct ImageData : public FileSection
 {
+	using channel_data_8 = ImageDataImpl::channel_data<uint8_t>;
+	using channel_data_16 = ImageDataImpl::channel_data<uint16_t>;
+	using channel_data_32 = ImageDataImpl::channel_data<float32_t>;
+	using channel_data_variant = std::variant<std::monostate, channel_data_8, channel_data_16, channel_data_32>;
 
-	/// Write out an empty image data section from the number of channels. This section is unfortunately required
+	/// Write the merged image data section. This section is unfortunately required.
 	inline void write(File& document, const FileHeader& header)
 	{
 		// Compression marker, we default to RLE compression to reduce the size significantly. The way in which the scanlines are stored
 		// is slightly different though. All the channels store their scanline sizes at the start of the ImageData section rather than
 		// at the start of each channel
 		WriteBinaryData<uint16_t>(document, 1u);
-		// Write out empty data for all of the channels
 		if (header.m_Depth == Enum::BitDepth::BD_8)
 		{
-			std::vector<uint8_t> emptyData(static_cast<uint64_t>(header.m_Width) * header.m_Height, 0u);
-			ImageDataImpl::writeCompressedData(document, header, m_NumChannels, std::move(emptyData));
+			write_typed<uint8_t>(document, header);
 		}
 		else if (header.m_Depth == Enum::BitDepth::BD_16)
 		{
-			std::vector<uint16_t> emptyData(static_cast<uint64_t>(header.m_Width) * header.m_Height, 0u);
-			ImageDataImpl::writeCompressedData(document, header, m_NumChannels, std::move(emptyData));
+			write_typed<uint16_t>(document, header);
 		}
 		else if (header.m_Depth == Enum::BitDepth::BD_32)
 		{
-			std::vector<float32_t> emptyData(static_cast<uint64_t>(header.m_Width) * header.m_Height, 0u);
-			ImageDataImpl::writeCompressedData(document, header, m_NumChannels, std::move(emptyData));
+			write_typed<float32_t>(document, header);
 		}
 	}
 
@@ -102,8 +125,45 @@ struct ImageData : public FileSection
 	/// from the header as the header counts alpha channels while this does not!
 	ImageData(uint16_t numChannels) : m_NumChannels(numChannels) {};
 
+	template <typename T>
+	void set_data(ImageDataImpl::channel_data<T> data)
+	{
+		m_ChannelData = std::move(data);
+	}
+
 private:
+	template <typename T>
+	void write_typed(File& document, const FileHeader& header)
+	{
+		using typed_data = ImageDataImpl::channel_data<T>;
+		const auto* stored = std::get_if<typed_data>(&m_ChannelData);
+		if (stored == nullptr)
+		{
+			ImageDataImpl::writeCompressedData(
+				document,
+				header,
+				typed_data(m_NumChannels, std::vector<T>(static_cast<uint64_t>(header.m_Width) * header.m_Height, T{})));
+			return;
+		}
+
+		if (stored->size() != m_NumChannels)
+		{
+			throw std::invalid_argument("merged image channel count does not match the Photoshop document header");
+		}
+
+		const auto expected_size = static_cast<uint64_t>(header.m_Width) * header.m_Height;
+		for (const auto& channel : *stored)
+		{
+			if (channel.size() != expected_size)
+			{
+				throw std::invalid_argument("merged image channel size does not match the Photoshop document dimensions");
+			}
+		}
+		ImageDataImpl::writeCompressedData(document, header, *stored);
+	}
+
 	uint16_t m_NumChannels = 0u;
+	channel_data_variant m_ChannelData{};
 };
 
 

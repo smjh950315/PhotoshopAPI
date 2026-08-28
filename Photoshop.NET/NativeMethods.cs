@@ -27,6 +27,8 @@ internal static class NativeMethods
     internal static extern PhotoshopStatus SetDocumentDpi(nint document, float dpi);
     [DllImport(LibraryName, CallingConvention = Convention, ExactSpelling = true, EntryPoint = "photoshopapi_c_document_set_compression")]
     internal static extern PhotoshopStatus SetDocumentCompression(nint document, PhotoshopCompression compression);
+    [DllImport(LibraryName, CallingConvention = Convention, ExactSpelling = true, EntryPoint = "photoshopapi_c_document_set_merged_rgb8")]
+    internal static extern PhotoshopStatus SetDocumentMergedRgb8(nint document, ref NativeRgb8View source);
     [DllImport(LibraryName, CallingConvention = Convention, ExactSpelling = true, EntryPoint = "photoshopapi_c_document_invalidate_text_cache")]
     internal static extern PhotoshopStatus InvalidateTextCache(nint document);
     [DllImport(LibraryName, CallingConvention = Convention, ExactSpelling = true, EntryPoint = "photoshopapi_c_document_get_icc_profile")]

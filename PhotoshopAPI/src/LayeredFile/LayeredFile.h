@@ -23,8 +23,11 @@
 #include <variant>
 #include <vector>
 #include <set>
+#include <array>
 #include <filesystem>
 #include <memory>
+#include <optional>
+#include <unordered_map>
 
 
 PSAPI_NAMESPACE_BEGIN
@@ -431,6 +434,18 @@ struct LayeredFile
 		}
 	}
 
+	/// Set the document-level merged image in logical channel order.
+	/// The channel count and dimensions are validated when the file is written.
+	void set_merged_image(std::unordered_map<Enum::ChannelID, std::vector<T>> channels)
+	{
+		m_MergedImage = std::move(channels);
+	}
+
+	std::optional<std::unordered_map<Enum::ChannelID, std::vector<T>>> take_merged_image() noexcept
+	{
+		return std::move(m_MergedImage);
+	}
+
 	/// Generate a flat layer stack from either the current root or (if supplied) from the given layer.
 	/// It should be preferred to use \ref flat_layers() (no arguments) instead of this function.
 	///
@@ -664,6 +679,9 @@ private:
 	/// The root layers in the file, they may contain multiple levels of sub-layers
 	std::vector<std::shared_ptr<Layer<T>>> m_Layers;
 
+	/// Optional document-level merged image, stored in logical channel order.
+	std::optional<std::unordered_map<Enum::ChannelID, std::vector<T>>> m_MergedImage;
+
 	/// The ICC Profile associated with the file, this may be empty in which case there will be no colour
 	/// profile associated with the file
 	ICCProfile m_ICCProfile;
@@ -773,7 +791,31 @@ std::unique_ptr<PhotoshopFile> layered_to_photoshop(LayeredFile<T>&& layered_fil
 	ColorModeData colorModeData = generate_colormodedata<T>(layered_file);
 	ImageResources imageResources = generate_imageresources<T>(layered_file);
 	LayerAndMaskInformation lrMaskInfo = generate_layermaskinfo<T>(layered_file, file_path);
-	ImageData imageData = ImageData(layered_file.num_channels());
+	const auto num_channels = layered_file.num_channels();
+	ImageData imageData = ImageData(num_channels);
+	if (auto merged_image = layered_file.take_merged_image(); merged_image.has_value())
+	{
+		static constexpr std::array<Enum::ChannelID, 9> channel_order{
+			Enum::ChannelID::Red,
+			Enum::ChannelID::Green,
+			Enum::ChannelID::Blue,
+			Enum::ChannelID::Cyan,
+			Enum::ChannelID::Magenta,
+			Enum::ChannelID::Yellow,
+			Enum::ChannelID::Black,
+			Enum::ChannelID::Gray,
+			Enum::ChannelID::Alpha};
+		std::vector<std::vector<T>> ordered_channels;
+		ordered_channels.reserve(merged_image->size());
+		for (const auto channel_id : channel_order)
+		{
+			if (const auto channel = merged_image->find(channel_id); channel != merged_image->end())
+			{
+				ordered_channels.push_back(std::move(channel->second));
+			}
+		}
+		imageData.set_data<T>(std::move(ordered_channels));
+	}
 
 	return std::make_unique<PhotoshopFile>(header, colorModeData, std::move(imageResources), std::move(lrMaskInfo), imageData);
 }

@@ -50,6 +50,7 @@ psapi_layer_type::Params make_params(
     psapi_layer_type::Params params{};
     params.name = layer_name(options, fallback);
     params.colormode = psapi::Enum::ColorMode::RGB;
+    params.compression = psapi::Enum::Compression::Rle;
     params.opacity = 255u;
     params.visible = true;
     params.locked = false;
@@ -328,6 +329,35 @@ PHOTOSHOPAPI_C_API void PHOTOSHOPAPI_C_CALL photoshopapi_c_document_destroy(
     photoshopapi_c_document* document)
 {
     delete document;
+}
+
+PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_document_set_merged_rgb8(
+    photoshopapi_c_document* document,
+    const photoshopapi_c_rgb8_view* source)
+{
+    if (document == nullptr || source == nullptr)
+    {
+        return PHOTOSHOPAPI_C_STATUS_INVALID_ARGUMENT;
+    }
+    return invoke(
+        document->last_error,
+        [&]
+        {
+            if (document->state == nullptr || !document_is_usable(*document->state))
+            {
+                throw ownership_error("document has already been consumed by a write attempt");
+            }
+            if (document->state->value->colormode() != psapi::Enum::ColorMode::RGB)
+            {
+                throw invalid_argument_error("merged RGB8 image requires an RGB document");
+            }
+            if (source->width != document->state->value->width() ||
+                source->height != document->state->value->height())
+            {
+                throw dimensions_error("merged image dimensions must match the document dimensions");
+            }
+            document->state->value->set_merged_image(copy_rgb_view(*source));
+        });
 }
 
 PHOTOSHOPAPI_C_API photoshopapi_c_status PHOTOSHOPAPI_C_CALL photoshopapi_c_group_layer_create(

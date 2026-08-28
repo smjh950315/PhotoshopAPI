@@ -1,6 +1,6 @@
 # Photoshop.NET
 
-`Photoshop.NET` is a dependency-free .NET 8 wrapper over the version 2
+`Photoshop.NET` is a dependency-free .NET 8 wrapper over the version 3
 `PhotoshopAPI.C` ABI. Native objects use deterministic `IDisposable` ownership;
 dispose every document and layer handle returned by the wrapper.
 

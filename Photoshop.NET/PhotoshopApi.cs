@@ -8,7 +8,7 @@ public static class PhotoshopApi
     /// <summary>
     /// Gets the ABI version expected by this managed wrapper.
     /// </summary>
-    public const uint AbiVersion = 2;
+    public const uint AbiVersion = 3;
 
     /// <summary>
     /// Gets the ABI version reported by the loaded native library.

@@ -53,6 +53,25 @@ public sealed class PhotoshopDocument : IDisposable
     public void SetDpi(float dpi) { EnsureUsable(); Throw(NativeMethods.SetDocumentDpi(_handle, dpi)); }
     /// <summary>Selects compression for all channels on the next write.</summary>
     public void SetCompression(PhotoshopCompression compression) { EnsureUsable(); Throw(NativeMethods.SetDocumentCompression(_handle, compression)); }
+    /// <summary>Sets the merged RGB8 composite written in the document image-data section.</summary>
+    public void SetMergedImage(Rgb8Image image)
+    {
+        EnsureUsable();
+        PhotoshopApi.ValidateImageBuffer(image.Pixels.Span, image.Width, image.Height, image.StrideBytes, 3, nameof(image));
+        var info = Info;
+        if (info.BitDepth != PhotoshopBitDepth.Bit8 || info.ColorMode != PhotoshopColorMode.Rgb)
+        {
+            throw new NotSupportedException("Merged RGB8 images require an 8-bit RGB document.");
+        }
+        if (image.Width != info.Width || image.Height != info.Height)
+        {
+            throw new ArgumentException("Merged image dimensions must match the document dimensions.", nameof(image));
+        }
+        var copy = image.Pixels.ToArray();
+        using var pinned = new PinnedBuffer(copy);
+        var view = new NativeRgb8View(pinned.Pointer, image.Width, image.Height, image.StrideBytes);
+        Throw(NativeMethods.SetDocumentMergedRgb8(_handle, ref view));
+    }
     /// <summary>Invalidates cached text previews so Photoshop renders edited text.</summary>
     public void InvalidateTextCache() { EnsureUsable(); Throw(NativeMethods.InvalidateTextCache(_handle)); }
 

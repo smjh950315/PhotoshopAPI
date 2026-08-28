@@ -4,7 +4,7 @@
 
 The C ABI exposes the high-level `LayeredFile` model used by the C++ and Python
 APIs while remaining safe to consume from .NET and other foreign-function
-interfaces. ABI version 2 keeps the original creation and write functions and
+interfaces. ABI version 3 keeps the original creation and write functions and
 adds PSD/PSB reading, automatic bit-depth handling, layer traversal, common
 layer editing, channel and mask access, text editing, and smart-object
 operations. Image-layer construction accepts packed RGB8 data without alpha or
@@ -33,7 +33,9 @@ straight-alpha RGBA8 data.
   sizes are reported in bytes.
 - Channel and mask samples use the document bit depth: `uint8_t` for 8-bit,
   `uint16_t` for 16-bit, and IEEE 754 `float` for 32-bit documents.
-- `photoshopapi_c_rgb8_view` contains packed red, green, and blue bytes;
+- `photoshopapi_c_rgb8_view` contains packed red, green, and blue bytes.
+- `photoshopapi_c_document_set_merged_rgb8` supplies the document-level merged
+  composite for an 8-bit RGB document.
   `photoshopapi_c_rgba8_view` additionally contains a straight alpha byte.
   A zero stride selects tightly packed rows (width times three or four bytes).
 
@@ -47,5 +49,5 @@ layer handle.
 
 New functions may be added without changing existing layouts. Existing enum
 values and public structure fields are stable for the lifetime of ABI version
-2. A future incompatible layout or ownership change requires a new ABI
+3. A future incompatible layout or ownership change requires a new ABI
 version.
