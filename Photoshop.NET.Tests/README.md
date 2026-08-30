@@ -1,10 +1,11 @@
-# Photoshop.NET native load test
+# Photoshop.NET production-readiness test
 
 This project is a dependency-free managed smoke test for `Photoshop.NET`. It
 calls the public wrapper through the real `DllImport` declarations, creates a
-document with RGB and RGBA images, a group, and a mask, writes a temporary PSD,
-reads it back, and verifies typed hierarchy traversal plus channel, alpha, and
-mask behavior.
+document with RGB and RGBA images, a group, a mask, and a supplied merged
+preview, then verifies byte-exact read-back. The default run covers both PSD and
+PSB output with Raw, RLE, ZIP, and ZIP-prediction compression. It also verifies
+16- and 32-bit document metadata detection.
 It also loads the copy from `runtimes/win-x64/native` by absolute path, so a
 missing native dependency fails before the wrapper test starts.
 
@@ -46,8 +47,9 @@ dotnet run --project Photoshop.NET.Tests/Photoshop.NET.Tests.csproj -c Release
 ```
 
 Additional PSD/PSB paths may be supplied after `--`. Each is opened through
-the wrapper and probed for metadata and root-layer traversal. The validation
-run covers checked-in 16-bit and 32-bit RGB PSD samples this way.
+the wrapper and probed for metadata and root-layer traversal. The built-in
+16/32-bit cases validate the managed create/write/read metadata path; supplied
+samples provide deeper coverage of real documents.
 
 If the native build is in a different directory, pass
 `PhotoshopApiNativeBuildDirectory` to MSBuild. For a dynamic `x64-windows`

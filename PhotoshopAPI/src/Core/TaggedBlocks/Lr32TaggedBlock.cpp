@@ -1,5 +1,7 @@
 #include "Lr32TaggedBlock.h"
 
+#include "Core/FileIO/LengthMarkers.h"
+
 
 PSAPI_NAMESPACE_BEGIN
 
@@ -25,8 +27,7 @@ void Lr32TaggedBlock::write(File& document, const FileHeader& header, ProgressCa
 	WriteBinaryData<uint32_t>(document, Signature("8BIM").m_Value);
 	WriteBinaryData<uint32_t>(document, Signature("Lr32").m_Value);
 
-	// We dont need to write a size marker for this data as the size marker of the LayerInfo takes
-	// care of that
+	Impl::ScopedLengthBlock<Impl::VariadicSize<uint32_t, uint64_t>> length_block(document, header, padding);
 	m_Data.write(document, header, callback);
 }
 
