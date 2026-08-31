@@ -1,8 +1,5 @@
 #include "Lr16TaggedBlock.h"
 
-#include "Core/FileIO/LengthMarkers.h"
-
-
 PSAPI_NAMESPACE_BEGIN
 
 
@@ -27,7 +24,10 @@ void Lr16TaggedBlock::write(File& document, const FileHeader& header, ProgressCa
 	WriteBinaryData<uint32_t>(document, Signature("8BIM").m_Value);
 	WriteBinaryData<uint32_t>(document, Signature("Lr16").m_Value);
 
-	Impl::ScopedLengthBlock<Impl::VariadicSize<uint32_t, uint64_t>> length_block(document, header, padding);
+	// LayerInfo::write() starts with the PSD/PSB-sized length field. In an
+	// Lr16 tagged block that field is also the tagged-block payload length, so
+	// adding another scoped length marker here would shift the layer count and
+	// corrupt the document.
 	m_Data.write(document, header, callback);
 }
 

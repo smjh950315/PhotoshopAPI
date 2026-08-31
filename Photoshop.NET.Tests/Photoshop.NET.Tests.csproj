@@ -18,6 +18,21 @@
     <ProjectReference Include="..\Photoshop.NET\Photoshop.NET.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\PhotoshopTest\documents\SingleLayer\SingleLayer_16bit.psd"
+          Link="fixtures\SingleLayer_16bit.psd"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\PhotoshopTest\documents\SingleLayer\SingleLayer_16bit.psb"
+          Link="fixtures\SingleLayer_16bit.psb"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\PhotoshopTest\documents\SingleLayer\SingleLayer_32bit.psd"
+          Link="fixtures\SingleLayer_32bit.psd"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\PhotoshopTest\documents\SingleLayer\SingleLayer_32bit.psb"
+          Link="fixtures\SingleLayer_32bit.psb"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <Target Name="CopyPhotoshopApiNativeRuntimeFiles" AfterTargets="Build">
     <ItemGroup>
       <!-- The x64-windows-static build has no project-owned native dependency

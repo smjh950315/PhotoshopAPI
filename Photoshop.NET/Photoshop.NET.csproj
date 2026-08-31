@@ -10,7 +10,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>false</IncludeSymbols>
-    <Version>0.9.1</Version>
+    <Version>0.9.2</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <!-- NuGet currently ships only the Windows native asset. This directory

@@ -48,8 +48,9 @@ dotnet run --project Photoshop.NET.Tests/Photoshop.NET.Tests.csproj -c Release
 
 Additional PSD/PSB paths may be supplied after `--`. Each is opened through
 the wrapper and probed for metadata and root-layer traversal. The built-in
-16/32-bit cases validate the managed create/write/read metadata path; supplied
-samples provide deeper coverage of real documents.
+16/32-bit cases copy the repository's layered single-image fixtures and
+validate managed read/write/read metadata preservation. Supplied samples
+provide deeper coverage of additional real documents.
 
 If the native build is in a different directory, pass
 `PhotoshopApiNativeBuildDirectory` to MSBuild. For a dynamic `x64-windows`

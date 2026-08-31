@@ -292,22 +292,33 @@ static void RunRgb8RoundTrip(string extension, PhotoshopCompression compression)
 
 static void RunMetadataRoundTrip(PhotoshopBitDepth depth, string extension)
 {
-    const ulong width = 2;
-    const ulong height = 2;
-    using var document = PhotoshopDocument.Create(depth, PhotoshopColorMode.Rgb, width, height);
+    var bitDepth = depth == PhotoshopBitDepth.Bit16 ? 16 : 32;
+    var inputPath = Path.Combine(
+        AppContext.BaseDirectory,
+        "fixtures",
+        $"SingleLayer_{bitDepth}bit{extension}");
     var outputPath = Path.Combine(Path.GetTempPath(), $"Photoshop.NET.Tests-{Guid.NewGuid():N}{extension}");
     try
     {
+        Require(File.Exists(inputPath), $"The {depth} {extension} fixture was not copied to the test output.");
+
+        using var document = PhotoshopDocument.Read(inputPath);
+        var sourceInfo = document.Info;
+        Require(sourceInfo.BitDepth == depth && sourceInfo.ColorMode == PhotoshopColorMode.Rgb &&
+                sourceInfo.RootLayerCount > 0,
+            $"The source {extension} fixture is not a layered RGB {depth} document.");
+
         document.Write(outputPath);
         Require(File.Exists(outputPath) && new FileInfo(outputPath).Length > 0,
             $"The managed wrapper did not write a non-empty {extension} {depth} document.");
 
         using var loaded = PhotoshopDocument.Read(outputPath);
         var info = loaded.Info;
-        Require(info.Width == width && info.Height == height &&
-                info.BitDepth == depth && info.ColorMode == PhotoshopColorMode.Rgb,
+        Require(info.Width == sourceInfo.Width && info.Height == sourceInfo.Height &&
+                info.BitDepth == depth && info.ColorMode == PhotoshopColorMode.Rgb &&
+                info.RootLayerCount == sourceInfo.RootLayerCount,
             $"Read-back {extension} metadata did not preserve {depth} samples.");
-        Console.WriteLine($"Passed {extension} {depth} metadata read-back.");
+        Console.WriteLine($"Passed {extension} {depth} layered metadata round-trip.");
     }
     finally
     {
