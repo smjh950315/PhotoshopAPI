@@ -5,12 +5,47 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <PlatformTarget>x64</PlatformTarget>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>false</IncludeSymbols>
+    <Version>0.9.1</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- NuGet currently ships only the Windows native asset. This directory
+         must come from the x64 static-runtime CMake preset. It can be
+         overridden when packaging from another checkout or build directory. -->
+    <PhotoshopApiNativeBuildDirectory Condition="'$(PhotoshopApiNativeBuildDirectory)' == ''">$(MSBuildThisFileDirectory)..\bin-int\PhotoshopAPI\x64-static-release\PhotoshopAPI.C\</PhotoshopApiNativeBuildDirectory>
+    <PhotoshopApiNativeLibrary>$(PhotoshopApiNativeBuildDirectory)PhotoshopAPI.C.dll</PhotoshopApiNativeLibrary>
   </PropertyGroup>
 
-  <Target Name="CopyPhotoshopApiNativeLibrary" 
-          AfterTargets="Build" Condition="Exists('$(MSBuildThisFileDirectory)..\bin-int\PhotoshopAPI\$(Configuration)\PhotoshopAPI.C\PhotoshopAPI.C.dll')">
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)..\bin-int\PhotoshopAPI\$(Configuration)\PhotoshopAPI.C\PhotoshopAPI.C.dll" DestinationFolder="$(OutputPath)runtimes\win-x64\native" />
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT' and Exists('$(PhotoshopApiNativeLibrary)')">
+    <None Include="$(PhotoshopApiNativeLibrary)"
+          Pack="true"
+          PackagePath="runtimes\win-x64\native" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md"
+          Pack="true"
+          PackagePath="\" />
+  </ItemGroup>
+
+  <Target Name="ValidatePhotoshopApiNativeLibrary"
+          BeforeTargets="Build;Pack"
+          Condition="'$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(PhotoshopApiNativeLibrary)')"
+           Text="The Windows NuGet package requires the static-runtime native library at '$(PhotoshopApiNativeLibrary)'. Build the x64-static-release CMake preset or override PhotoshopApiNativeBuildDirectory." />
+  </Target>
+
+  <Target Name="CopyPhotoshopApiNativeLibrary"
+          AfterTargets="Build"
+          Condition="'$(OS)' == 'Windows_NT'">
+    <MakeDir Directories="$(OutputPath)runtimes\win-x64\native" />
+    <Copy SourceFiles="$(PhotoshopApiNativeLibrary)"
+          DestinationFolder="$(OutputPath)runtimes\win-x64\native"
+          SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
